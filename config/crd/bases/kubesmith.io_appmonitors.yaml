@@ -1,0 +1,119 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: appmonitors.kubesmith.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: kubesmith.io
+  names:
+    kind: AppMonitor
+    listKind: AppMonitorList
+    plural: appmonitors
+    singular: appmonitor
+    shortNames:
+      - appmon
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: AppDeployment
+          type: string
+          jsonPath: .spec.appDeploymentRef
+        - name: Health
+          type: string
+          jsonPath: .status.health
+        - name: ServiceMonitor
+          type: boolean
+          jsonPath: .status.serviceMonitorCreated
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: AppMonitor is the Schema for the appmonitors API.
+          type: object
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: AppMonitorSpec defines the desired monitoring configuration.
+              type: object
+              required: [appDeploymentRef]
+              properties:
+                appDeploymentRef:
+                  description: Name of the AppDeployment to monitor (same namespace).
+                  type: string
+                metrics:
+                  description: Prometheus scraping configuration.
+                  type: object
+                  required: [enabled]
+                  properties:
+                    enabled:
+                      type: boolean
+                    port:
+                      type: string
+                    path:
+                      type: string
+                      default: /metrics
+                    interval:
+                      type: string
+                      default: "30s"
+                alerts:
+                  description: Alerting rules to create as a PrometheusRule.
+                  type: array
+                  items:
+                    type: object
+                    required: [name, expr]
+                    properties:
+                      name:
+                        type: string
+                      expr:
+                        type: string
+                      for:
+                        type: string
+                      severity:
+                        type: string
+                        enum: [info, warning, critical]
+                        default: warning
+                      summary:
+                        type: string
+            status:
+              description: AppMonitorStatus defines the observed state.
+              type: object
+              properties:
+                health:
+                  type: string
+                serviceMonitorCreated:
+                  type: boolean
+                prometheusRuleCreated:
+                  type: boolean
+                lastReconciledAt:
+                  type: string
+                  format: date-time
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    required: [lastTransitionTime, message, reason, status, type]
+                    properties:
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                      message:
+                        type: string
+                      reason:
+                        type: string
+                      status:
+                        type: string
+                      type:
+                        type: string

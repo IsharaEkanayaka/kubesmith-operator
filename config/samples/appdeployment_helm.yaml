@@ -1,0 +1,19 @@
+apiVersion: kubesmith.io/v1alpha1
+kind: AppDeployment
+metadata:
+  name: nginx
+  namespace: staging
+spec:
+  type: helm
+  helm:
+    repoUrl: https://charts.bitnami.com/bitnami
+    chart: nginx
+    version: "18.1.0"
+    values: |
+      replicaCount: 2
+      service:
+        type: ClusterIP
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi

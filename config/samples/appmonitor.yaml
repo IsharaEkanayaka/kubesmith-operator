@@ -1,0 +1,23 @@
+apiVersion: kubesmith.io/v1alpha1
+kind: AppMonitor
+metadata:
+  name: nginx-monitor
+  namespace: staging
+spec:
+  appDeploymentRef: nginx
+  metrics:
+    enabled: true
+    port: metrics
+    path: /metrics
+    interval: 30s
+  alerts:
+    - name: NginxHighRestarts
+      expr: increase(kube_pod_container_status_restarts_total{namespace="staging"}[15m]) > 3
+      for: 5m
+      severity: warning
+      summary: "Pod restart count is high for nginx in staging"
+    - name: NginxPodsNotReady
+      expr: kube_deployment_status_replicas_unavailable{namespace="staging",deployment="nginx"} > 0
+      for: 2m
+      severity: critical
+      summary: "One or more nginx pods are not ready"
