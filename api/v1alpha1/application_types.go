@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // ApplicationSpec defines the desired state of Application.
@@ -108,4 +109,68 @@ type ApplicationList struct {
 
 func init() {
 	SchemeBuilder.Register(&Application{}, &ApplicationList{})
+}
+
+// DeepCopyObject implements runtime.Object for Application.
+func (in *Application) DeepCopyObject() runtime.Object {
+	if in == nil {
+		return nil
+	}
+	out := new(Application)
+	*out = *in
+	out.TypeMeta = in.TypeMeta
+	out.ObjectMeta = *in.ObjectMeta.DeepCopy()
+	if in.Spec.Deploy != nil {
+		deploy := *in.Spec.Deploy
+		out.Spec.Deploy = &deploy
+	}
+	if in.Spec.Monitoring != nil {
+		monitoring := *in.Spec.Monitoring
+		if in.Spec.Monitoring.Metrics != nil {
+			metrics := *in.Spec.Monitoring.Metrics
+			monitoring.Metrics = &metrics
+		}
+		out.Spec.Monitoring = &monitoring
+	}
+	if in.Status.LastSyncedAt != nil {
+		last := *in.Status.LastSyncedAt
+		out.Status.LastSyncedAt = &last
+	}
+	return out
+}
+
+// DeepCopyObject implements runtime.Object for ApplicationList.
+func (in *ApplicationList) DeepCopyObject() runtime.Object {
+	if in == nil {
+		return nil
+	}
+	out := new(ApplicationList)
+	*out = *in
+	out.TypeMeta = in.TypeMeta
+	out.ListMeta = in.ListMeta
+	if in.Items != nil {
+		out.Items = make([]Application, len(in.Items))
+		for i := range in.Items {
+			item := in.Items[i]
+			out.Items[i] = item
+			out.Items[i].ObjectMeta = *item.ObjectMeta.DeepCopy()
+			if item.Spec.Deploy != nil {
+				deploy := *item.Spec.Deploy
+				out.Items[i].Spec.Deploy = &deploy
+			}
+			if item.Spec.Monitoring != nil {
+				monitoring := *item.Spec.Monitoring
+				if item.Spec.Monitoring.Metrics != nil {
+					metrics := *item.Spec.Monitoring.Metrics
+					monitoring.Metrics = &metrics
+				}
+				out.Items[i].Spec.Monitoring = &monitoring
+			}
+			if item.Status.LastSyncedAt != nil {
+				last := *item.Status.LastSyncedAt
+				out.Items[i].Status.LastSyncedAt = &last
+			}
+		}
+	}
+	return out
 }
