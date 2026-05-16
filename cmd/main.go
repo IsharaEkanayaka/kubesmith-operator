@@ -4,7 +4,8 @@ import (
 	"flag"
 	"os"
 
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
+	kubesmithv1alpha1 "github.com/kubesmith/operator/api/v1alpha1"
+	"github.com/kubesmith/operator/internal/controller"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -12,9 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-
-	kubesmithv1alpha1 "github.com/kubesmith/kubesmith-operator/api/v1alpha1"
-	"github.com/kubesmith/kubesmith-operator/internal/controller"
 )
 
 var (
@@ -25,7 +23,6 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kubesmithv1alpha1.AddToScheme(scheme))
-	utilruntime.Must(monitoringv1.AddToScheme(scheme))
 }
 
 func main() {
@@ -56,22 +53,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	restCfg := mgr.GetConfig()
-
-	if err = (&controller.AppDeploymentReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		Config: restCfg,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create AppDeployment controller")
-		os.Exit(1)
-	}
-
-	if err = (&controller.AppMonitorReconciler{
+	if err = (&controller.ApplicationReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create AppMonitor controller")
+		setupLog.Error(err, "unable to create Application controller")
 		os.Exit(1)
 	}
 
@@ -84,7 +70,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("starting kubesmith-operator manager")
+	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "manager exited with error")
 		os.Exit(1)

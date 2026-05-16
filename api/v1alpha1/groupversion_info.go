@@ -1,6 +1,6 @@
-// Package v1alpha1 contains API Schema definitions for the kubesmith.io v1alpha1 API group.
+// Package v1alpha1 contains API Schema definitions for the platform v1alpha1 API group.
 // +kubebuilder:object:generate=true
-// +groupName=kubesmith.io
+// +groupName=platform.kubesmith.io
 package v1alpha1
 
 import (
@@ -8,13 +8,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
-var (
-	// GroupVersion is group version used to register these objects.
-	GroupVersion = schema.GroupVersion{Group: "kubesmith.io", Version: "v1alpha1"}
+// GroupVersion is group version used to register these objects.
+var GroupVersion = schema.GroupVersion{Group: "platform.kubesmith.io", Version: "v1alpha1"}
 
-	// SchemeBuilder is used to add functions to this group's scheme.
-	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}
+// SchemeBuilder is used to add go types to the GroupVersionKind scheme.
+var SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}
 
-	// AddToScheme adds the types in this group-version to the given scheme.
-	AddToScheme = SchemeBuilder.AddToScheme
-)
+// AddToScheme adds the types in this group-version to the given scheme.
+var AddToScheme = SchemeBuilder.AddToScheme
