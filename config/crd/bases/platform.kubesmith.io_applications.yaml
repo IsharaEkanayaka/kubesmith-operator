@@ -14,6 +14,19 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
+    additionalPrinterColumns:
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Sync
+      type: string
+      jsonPath: .status.argoStatus.syncStatus
+    - name: Health
+      type: string
+      jsonPath: .status.argoStatus.healthStatus
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
     schema:
       openAPIV3Schema:
         type: object
@@ -44,6 +57,22 @@ spec:
                 properties:
                   namespace:
                     type: string
+                  resourceQuota:
+                    type: object
+                    properties:
+                      cpu:
+                        type: string
+                      memory:
+                        type: string
+                      pods:
+                        type: string
+                  limitRange:
+                    type: object
+                    properties:
+                      defaultCpu:
+                        type: string
+                      defaultMemory:
+                        type: string
               deploy:
                 type: object
                 properties:
@@ -68,6 +97,26 @@ spec:
                         type: string
                       path:
                         type: string
+              rbac:
+                type: object
+                properties:
+                  owners:
+                    type: array
+                    items:
+                      type: string
+                  viewers:
+                    type: array
+                    items:
+                      type: string
+              network:
+                type: object
+                properties:
+                  allowFromNamespaces:
+                    type: array
+                    items:
+                      type: string
+                  denyAll:
+                    type: boolean
           status:
             type: object
             properties:
@@ -75,8 +124,44 @@ spec:
                 type: string
               message:
                 type: string
+              conditions:
+                type: array
+                items:
+                  type: object
+                  required:
+                  - type
+                  - status
+                  - lastTransitionTime
+                  - reason
+                  - message
+                  properties:
+                    type:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                    lastTransitionTime:
+                      type: string
+                      format: date-time
+                    reason:
+                      type: string
+                    message:
+                      type: string
+                    observedGeneration:
+                      type: integer
+                      format: int64
               lastSyncedAt:
                 type: string
                 format: date-time
+              argoStatus:
+                type: object
+                properties:
+                  syncStatus:
+                    type: string
+                  healthStatus:
+                    type: string
     subresources:
       status: {}

@@ -1,13 +1,30 @@
-IMAGE ?= kubesmith/operator:latest
+IMG ?= kubesmith-operator:latest
 
-.PHONY: build
+.PHONY: build run test docker-build docker-push install
+
 build:
 	go build -o bin/manager ./cmd/main.go
 
-.PHONY: run
 run:
 	go run ./cmd/main.go
 
-.PHONY: docker-build
+test:
+	go test ./... -v -coverprofile=coverage.out
+
+test-coverage: test
+	go tool cover -html=coverage.out
+
+install:
+	kubectl apply -f config/crd/bases/platform.kubesmith.io_applications.yaml
+
 docker-build:
-	docker build -t $(IMAGE) .
+	docker build -t $(IMG) .
+
+docker-push:
+	docker push $(IMG)
+
+fmt:
+	go fmt ./...
+
+vet:
+	go vet ./...
